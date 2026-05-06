@@ -3,30 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ストップウォッチ</title>
+  <title>Stopwatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@200;300;400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
   <div class="container">
-    <h1 class="title">STOPWATCH</h1>
+    <header class="header">
+      <div class="logo">
+        <span class="logo-dot"></span>
+        STOPWATCH
+      </div>
+    </header>
 
-    <div class="display">
-      <span id="minutes">00</span>
-      <span class="colon">:</span>
-      <span id="seconds">00</span>
-      <span class="dot">.</span>
-      <span id="milliseconds">00</span>
-    </div>
+    <main>
+      <!-- Ring + Display -->
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 320 320">
+          <circle class="ring-bg" cx="160" cy="160" r="148" />
+          <circle class="ring-progress" id="ring" cx="160" cy="160" r="148" />
+        </svg>
 
-    <div class="controls">
-      <button id="lap-btn" class="btn btn-secondary" disabled>ラップ</button>
-      <button id="start-btn" class="btn btn-primary">スタート</button>
-      <button id="reset-btn" class="btn btn-secondary" disabled>リセット</button>
-    </div>
+        <div class="display">
+          <div class="display-top">
+            <span id="hours" class="hidden">00</span>
+            <span id="hours-colon" class="colon hidden">:</span>
+            <span id="minutes">00</span>
+            <span class="colon">:</span>
+            <span id="seconds">00</span>
+          </div>
+          <div class="display-ms">
+            <span class="dot">.</span><span id="milliseconds">000</span>
+          </div>
+          <div class="display-label">経過時間</div>
+        </div>
+      </div>
 
-    <div class="laps-wrapper">
-      <ol id="laps" reversed></ol>
-    </div>
+      <!-- Controls -->
+      <div class="controls">
+        <button id="lap-btn" class="btn btn-lap" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          ラップ
+        </button>
+
+        <button id="start-btn" class="btn btn-start">
+          <span id="start-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          </span>
+          <span id="start-label">スタート</span>
+        </button>
+
+        <button id="reset-btn" class="btn btn-reset" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          リセット
+        </button>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="stats" id="stats" style="display:none">
+        <div class="stat-item">
+          <span class="stat-label">ベスト</span>
+          <span class="stat-val best" id="stat-best">--:--.---</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-label">ラップ数</span>
+          <span class="stat-val" id="stat-count">0</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-label">ワースト</span>
+          <span class="stat-val worst" id="stat-worst">--:--.---</span>
+        </div>
+      </div>
+
+      <!-- Laps -->
+      <div class="laps-section" id="laps-section" style="display:none">
+        <div class="laps-header">
+          <span>ラップ</span>
+          <span>スプリット</span>
+          <span>累計</span>
+        </div>
+        <ul id="laps"></ul>
+      </div>
+    </main>
   </div>
 
   <script src="app.js"></script>
