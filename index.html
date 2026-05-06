@@ -3,28 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple Alarm</title>
+  <title>ランダムポケモン</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <div class="clock" id="clock">00:00:00</div>
+  <div class="page">
+    <header>
+      <h1>ランダムポケモン</h1>
+    </header>
 
-    <div class="alarm-section">
-      <h2>アラーム設定</h2>
-      <input type="time" id="alarm-time" />
-      <button id="set-btn">セット</button>
-    </div>
+    <main>
+      <div class="card" id="card">
+        <div class="card-inner" id="card-inner">
+          <div class="pokemon-number" id="pokemon-number">#000</div>
+          <div class="image-wrap">
+            <img id="pokemon-img" src="" alt="" />
+          </div>
+          <div class="pokemon-name" id="pokemon-name">---</div>
+          <div class="types" id="types"></div>
+          <div class="stats" id="stats"></div>
+          <div class="meta" id="meta"></div>
+        </div>
 
-    <div class="alarm-list" id="alarm-list"></div>
-
-    <div class="modal hidden" id="modal">
-      <div class="modal-content">
-        <div class="bell">🔔</div>
-        <p id="modal-time"></p>
-        <button id="stop-btn">止める</button>
+        <div class="loading hidden" id="loading">
+          <div class="pokeball">
+            <div class="pokeball-top"></div>
+            <div class="pokeball-mid"></div>
+            <div class="pokeball-bot"></div>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <button class="roll-btn" id="roll-btn">
+        <span>つぎのポケモン</span>
+      </button>
+    </main>
   </div>
 
   <script src="app.js"></script>
