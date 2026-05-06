@@ -1,99 +1,118 @@
-const clockEl   = document.getElementById('clock');
-const alarmInput = document.getElementById('alarm-time');
-const setBtn     = document.getElementById('set-btn');
-const alarmList  = document.getElementById('alarm-list');
-const modal      = document.getElementById('modal');
-const modalTime  = document.getElementById('modal-time');
-const stopBtn    = document.getElementById('stop-btn');
+const minutesEl      = document.getElementById('minutes');
+const secondsEl      = document.getElementById('seconds');
+const millisecondsEl = document.getElementById('milliseconds');
+const startBtn       = document.getElementById('start-btn');
+const lapBtn         = document.getElementById('lap-btn');
+const resetBtn       = document.getElementById('reset-btn');
+const lapsList       = document.getElementById('laps');
 
-let alarms = [];
-let audioCtx = null;
-let alarmInterval = null;
+let startTime   = 0;
+let elapsed     = 0;
+let rafId       = null;
+let running     = false;
+let lapStart    = 0;
+let lapTimes    = [];
 
-function pad(n) {
-  return String(n).padStart(2, '0');
+function pad(n, w = 2) {
+  return String(n).padStart(w, '0');
 }
 
-function updateClock() {
-  const now = new Date();
-  clockEl.textContent =
-    pad(now.getHours()) + ':' +
-    pad(now.getMinutes()) + ':' +
-    pad(now.getSeconds());
-
-  const hhmm = pad(now.getHours()) + ':' + pad(now.getMinutes());
-  const ss   = now.getSeconds();
-
-  if (ss === 0 && alarms.includes(hhmm)) {
-    triggerAlarm(hhmm);
-  }
+function formatTime(ms) {
+  const m   = Math.floor(ms / 60000);
+  const s   = Math.floor((ms % 60000) / 1000);
+  const cs  = Math.floor((ms % 1000) / 10);
+  return { m, s, cs };
 }
 
-function renderAlarms() {
-  alarmList.innerHTML = '';
-  alarms.forEach(t => {
-    const item = document.createElement('div');
-    item.className = 'alarm-item';
-    item.innerHTML = `
-      <span class="time">${t}</span>
-      <button class="delete-btn" data-time="${t}">✕</button>
-    `;
-    alarmList.appendChild(item);
+function render(ms) {
+  const { m, s, cs } = formatTime(ms);
+  minutesEl.textContent      = pad(m);
+  secondsEl.textContent      = pad(s);
+  millisecondsEl.textContent = pad(cs);
+}
+
+function tick() {
+  elapsed = Date.now() - startTime;
+  render(elapsed);
+  rafId = requestAnimationFrame(tick);
+}
+
+function start() {
+  startTime = Date.now() - elapsed;
+  lapStart  = lapStart || startTime;
+  running   = true;
+  startBtn.textContent = 'ストップ';
+  startBtn.classList.add('running');
+  lapBtn.disabled   = false;
+  resetBtn.disabled = true;
+  rafId = requestAnimationFrame(tick);
+}
+
+function stop() {
+  cancelAnimationFrame(rafId);
+  running = false;
+  startBtn.textContent = 'スタート';
+  startBtn.classList.remove('running');
+  lapBtn.disabled   = true;
+  resetBtn.disabled = false;
+}
+
+function reset() {
+  cancelAnimationFrame(rafId);
+  running   = false;
+  elapsed   = 0;
+  lapStart  = 0;
+  lapTimes  = [];
+  render(0);
+  lapsList.innerHTML   = '';
+  startBtn.textContent = 'スタート';
+  startBtn.classList.remove('running');
+  lapBtn.disabled   = true;
+  resetBtn.disabled = true;
+}
+
+function addLap() {
+  const now        = Date.now();
+  const lapElapsed = now - lapStart;
+  lapStart         = now;
+  lapTimes.push(lapElapsed);
+
+  const total   = lapTimes.length;
+  const minTime = Math.min(...lapTimes);
+  const maxTime = Math.max(...lapTimes);
+
+  Array.from(lapsList.children).forEach(li => {
+    li.classList.remove('best', 'worst');
   });
+
+  lapTimes.forEach((t, i) => {
+    const li = lapsList.children[total - 1 - i];
+    if (!li) return;
+    if (total > 1) {
+      if (t === minTime) li.classList.add('best');
+      else if (t === maxTime) li.classList.add('worst');
+    }
+  });
+
+  const { m, s, cs } = formatTime(lapElapsed);
+  const splitStr = `${pad(m)}:${pad(s)}.${pad(cs)}`;
+
+  const totalMs = lapTimes.reduce((a, b) => a + b, 0);
+  const { m: tm, s: ts, cs: tcs } = formatTime(totalMs);
+  const totalStr = `${pad(tm)}:${pad(ts)}.${pad(tcs)}`;
+
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <span class="lap-num">ラップ ${total}</span>
+    <span class="lap-time">${splitStr}</span>
+    <span class="lap-split">${totalStr}</span>
+  `;
+  lapsList.prepend(li);
 }
 
-function addAlarm() {
-  const val = alarmInput.value;
-  if (!val) return;
-  if (alarms.includes(val)) return;
-  alarms.push(val);
-  alarms.sort();
-  renderAlarms();
-  alarmInput.value = '';
-}
-
-function deleteAlarm(time) {
-  alarms = alarms.filter(t => t !== time);
-  renderAlarms();
-}
-
-function beep() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc  = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-  osc.start(audioCtx.currentTime);
-  osc.stop(audioCtx.currentTime + 0.8);
-}
-
-function triggerAlarm(time) {
-  modalTime.textContent = time;
-  modal.classList.remove('hidden');
-  beep();
-  alarmInterval = setInterval(beep, 1000);
-}
-
-function stopAlarm() {
-  modal.classList.add('hidden');
-  clearInterval(alarmInterval);
-  alarmInterval = null;
-}
-
-setBtn.addEventListener('click', addAlarm);
-alarmInput.addEventListener('keydown', e => { if (e.key === 'Enter') addAlarm(); });
-
-alarmList.addEventListener('click', e => {
-  if (e.target.classList.contains('delete-btn')) {
-    deleteAlarm(e.target.dataset.time);
-  }
+startBtn.addEventListener('click', () => {
+  if (running) stop(); else start();
 });
 
-stopBtn.addEventListener('click', stopAlarm);
-
-setInterval(updateClock, 1000);
-updateClock();
+lapBtn.addEventListener('click', addLap);
+resetBtn.addEventListener('click', reset);

@@ -3,27 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple Alarm</title>
+  <title>ストップウォッチ</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <div class="clock" id="clock">00:00:00</div>
+    <h1 class="title">STOPWATCH</h1>
 
-    <div class="alarm-section">
-      <h2>アラーム設定</h2>
-      <input type="time" id="alarm-time" />
-      <button id="set-btn">セット</button>
+    <div class="display">
+      <span id="minutes">00</span>
+      <span class="colon">:</span>
+      <span id="seconds">00</span>
+      <span class="dot">.</span>
+      <span id="milliseconds">00</span>
     </div>
 
-    <div class="alarm-list" id="alarm-list"></div>
+    <div class="controls">
+      <button id="lap-btn" class="btn btn-secondary" disabled>ラップ</button>
+      <button id="start-btn" class="btn btn-primary">スタート</button>
+      <button id="reset-btn" class="btn btn-secondary" disabled>リセット</button>
+    </div>
 
-    <div class="modal hidden" id="modal">
-      <div class="modal-content">
-        <div class="bell">🔔</div>
-        <p id="modal-time"></p>
-        <button id="stop-btn">止める</button>
-      </div>
+    <div class="laps-wrapper">
+      <ol id="laps" reversed></ol>
     </div>
   </div>
 
