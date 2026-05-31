@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentMatch - 管理ダッシュボード</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --main:    #1A5FA8;
+      --main-lt: #EBF2FB;
+      --accent:  #2CA58D;
+      --acc-lt:  #E8F7F4;
+      --text:    #3D4A5C;
+      --text-sub:#7A8899;
+      --bg:      #F4F7FB;
+      --white:   #FFFFFF;
+      --border:  #E2E8F2;
+      --red:     #E05252;
+      --yellow:  #F0A500;
+      --shadow:  0 2px 12px rgba(26,95,168,0.08);
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0 20px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 24px 32px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--main), var(--accent));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 13px; letter-spacing: -0.5px;
+    }
+
+    .logo-text {
+      font-size: 17px; font-weight: 700; color: var(--main);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-label {
+      font-size: 10px; font-weight: 500;
+      color: var(--text-sub); letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 0 12px; margin-bottom: 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-sub);
+      font-weight: 500; font-size: 13.5px;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { background: var(--bg); color: var(--text); }
+    .nav-item.active {
+      background: var(--main-lt);
+      color: var(--main);
+    }
+
+    .nav-item svg { flex-shrink: 0; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff; font-size: 10px; font-weight: 700;
+      border-radius: 20px; padding: 1px 7px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 24px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info {
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #1A5FA8, #2CA58D);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 12px; font-weight: 700;
+    }
+
+    .user-name { font-size: 13px; font-weight: 500; }
+    .user-role { font-size: 11px; color: var(--text-sub); }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 36px;
+    }
+
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+    .page-sub { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
+
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      padding: 9px 18px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--main); color: #fff;
+    }
+    .btn-primary:hover { background: #154d8a; }
+
+    .btn-outline {
+      background: #fff; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--main); color: var(--main); }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 22px 22px 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .kpi-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .kpi-icon.blue  { background: var(--main-lt); color: var(--main); }
+    .kpi-icon.green { background: var(--acc-lt); color: var(--accent); }
+    .kpi-icon.red   { background: #FDEAEA; color: var(--red); }
+    .kpi-icon.yellow{ background: #FEF5E0; color: var(--yellow); }
+
+    .kpi-trend {
+      font-size: 11.5px; font-weight: 600; padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .kpi-trend.up   { background: #E9FBF4; color: #1E9E6C; }
+    .kpi-trend.down { background: #FDEAEA; color: var(--red); }
+
+    .kpi-value {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+      color: var(--text); line-height: 1;
+    }
+
+    .kpi-label {
+      font-size: 12px; color: var(--text-sub); margin-top: 6px; font-weight: 500;
+    }
+
+    /* ── Main Grid ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 22px 0;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 15px; font-weight: 700;
+    }
+
+    .card-link {
+      font-size: 12px; color: var(--main); cursor: pointer; font-weight: 500;
+    }
+
+    /* ── Bar Chart ── */
+    .chart-area {
+      padding: 0 22px 20px;
+    }
+
+    .chart-legend {
+      display: flex; gap: 16px; margin-bottom: 16px;
+    }
+
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-sub);
+    }
+
+    .legend-dot {
+      width: 8px; height: 8px; border-radius: 2px;
+    }
+
+    .bar-chart {
+      display: flex; align-items: flex-end; gap: 8px;
+      height: 140px;
+    }
+
+    .bar-group {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+
+    .bars {
+      display: flex; gap: 3px; align-items: flex-end;
+      height: 120px;
+    }
+
+    .bar {
+      width: 14px;
+      border-radius: 4px 4px 0 0;
+      transition: opacity 0.2s;
+    }
+    .bar:hover { opacity: 0.8; }
+    .bar.main   { background: var(--main); }
+    .bar.accent { background: var(--accent); }
+
+    .bar-label {
+      font-size: 10.5px; color: var(--text-sub);
+    }
+
+    /* ── Activity Ring ── */
+    .ring-card {
+      padding: 20px 22px;
+    }
+
+    .ring-wrap {
+      display: flex; align-items: center; justify-content: center;
+      margin: 12px 0 20px;
+    }
+
+    .ring-svg { position: relative; }
+
+    .ring-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+
+    .ring-value {
+      font-size: 22px; font-weight: 700; color: var(--text);
+    }
+
+    .ring-unit { font-size: 11px; color: var(--text-sub); }
+
+    .ring-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .ring-stat-item {
+      background: var(--bg);
+      border-radius: 10px; padding: 12px;
+      text-align: center;
+    }
+
+    .ring-stat-val {
+      font-size: 16px; font-weight: 700;
+    }
+
+    .ring-stat-val.blue { color: var(--main); }
+    .ring-stat-val.green{ color: var(--accent); }
+
+    .ring-stat-lbl {
+      font-size: 10.5px; color: var(--text-sub); margin-top: 2px;
+    }
+
+    /* ── Agent Table ── */
+    .agent-card {
+      margin-bottom: 24px;
+    }
+
+    .agent-table {
+      width: 100%; border-collapse: collapse;
+    }
+
+    .agent-table thead th {
+      padding: 10px 22px;
+      text-align: left;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .agent-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    .agent-table tbody tr:last-child { border-bottom: none; }
+    .agent-table tbody tr:hover { background: var(--bg); }
+
+    .agent-table td {
+      padding: 14px 22px;
+      vertical-align: middle;
+    }
+
+    .agent-profile {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .agent-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; color: #fff;
+      flex-shrink: 0;
+    }
+
+    .agent-name { font-weight: 600; font-size: 13.5px; }
+    .agent-area { font-size: 11.5px; color: var(--text-sub); margin-top: 1px; }
+
+    .stars {
+      color: var(--yellow); font-size: 12px; letter-spacing: 1px;
+    }
+
+    .score { font-size: 13px; font-weight: 600; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11.5px; font-weight: 600; padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .status-badge::before {
+      content: '';
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+
+    .status-badge.active  { background: #E9FBF4; color: #1E9E6C; }
+    .status-badge.active::before  { background: #1E9E6C; }
+    .status-badge.busy   { background: #FEF5E0; color: var(--yellow); }
+    .status-badge.busy::before   { background: var(--yellow); }
+    .status-badge.offline{ background: var(--bg); color: var(--text-sub); }
+    .status-badge.offline::before{ background: var(--text-sub); }
+
+    .progress-bar {
+      width: 80px; height: 5px; background: var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 10px;
+      background: linear-gradient(90deg, var(--main), var(--accent));
+    }
+
+    /* ── Match Panel ── */
+    .match-section {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 20px; margin-bottom: 24px;
+    }
+
+    .match-list {
+      padding: 0 0 8px;
+    }
+
+    .match-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 22px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .match-item:last-child { border-bottom: none; }
+    .match-item:hover { background: var(--bg); }
+
+    .match-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #E8F1FB, #C5D9F5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+
+    .match-info { flex: 1; min-width: 0; }
+    .match-name { font-size: 13px; font-weight: 600; }
+    .match-detail { font-size: 11.5px; color: var(--text-sub); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .match-score-badge {
+      background: var(--main-lt);
+      color: var(--main);
+      font-size: 12px; font-weight: 700;
+      padding: 4px 10px; border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .match-score-badge.high {
+      background: var(--acc-lt); color: var(--accent);
+    }
+
+    /* ── Notifications ── */
+    .notif-list { padding: 0 0 8px; }
+
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .notif-item:last-child { border-bottom: none; }
+
+    .notif-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 5px;
+    }
+    .notif-dot.blue  { background: var(--main); }
+    .notif-dot.green { background: var(--accent); }
+    .notif-dot.yellow{ background: var(--yellow); }
+
+    .notif-text { font-size: 12.5px; line-height: 1.5; flex: 1; }
+    .notif-bold { font-weight: 600; }
+    .notif-time { font-size: 11px; color: var(--text-sub); margin-top: 3px; }
+
+    /* ── Search Bar ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .search-box {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 14px;
+      width: 260px;
+    }
+
+    .search-box input {
+      border: none; outline: none; background: transparent;
+      font-size: 13px; color: var(--text); font-family: inherit;
+      width: 100%;
+    }
+
+    .search-box input::placeholder { color: var(--text-sub); }
+
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--white); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-sub);
+    }
+    .icon-btn:hover { border-color: var(--main); color: var(--main); }
+
+    .notif-btn { position: relative; }
+    .notif-dot-indicator {
+      position: absolute; top: 6px; right: 6px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--red); border: 1.5px solid var(--white);
+    }
+
+    /* Responsive hint */
+    @media (max-width: 1200px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">AM</div>
+    <div class="logo-text">AgentMatch</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">メイン</div>
+
+    <div class="nav-item active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      ダッシュボード
+    </div>
+
+    <div class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      エージェント管理
+      <span class="nav-badge">42</span>
+    </div>
+
+    <div class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.36 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+      マッチング
+    </div>
+
+    <div class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      アナリティクス
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">ユーザー</div>
+
+    <div class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      ユーザー一覧
+    </div>
+
+    <div class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      チャット
+      <span class="nav-badge">8</span>
+    </div>
+
+    <div class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      設定
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">山田</div>
+      <div>
+        <div class="user-name">山田 健一</div>
+        <div class="user-role">管理者</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Main Content ── -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="search-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="エージェント・ユーザーを検索..." />
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn notif-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot-indicator"></span>
+      </div>
+      <div class="icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">ダッシュボード</div>
+      <div class="page-sub">2026年5月 — KPIサマリー &amp; エージェント稼働状況</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline">レポート出力</button>
+      <button class="btn btn-primary">＋ エージェント追加</button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="kpi-icon blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.36 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+        </div>
+        <span class="kpi-trend up">▲ +18%</span>
+      </div>
+      <div class="kpi-value">487</div>
+      <div class="kpi-label">マッチング成立数（今月）</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="kpi-icon green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <span class="kpi-trend up">▲ +5pt</span>
+      </div>
+      <div class="kpi-value">38.2<span style="font-size:16px;font-weight:500">%</span></div>
+      <div class="kpi-label">成約率</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="kpi-icon yellow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <span class="kpi-trend up">▲ +0.2</span>
+      </div>
+      <div class="kpi-value">4.6<span style="font-size:16px;font-weight:500">/5.0</span></div>
+      <div class="kpi-label">ユーザー満足度スコア</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="kpi-icon blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </div>
+        <span class="kpi-trend up">▲ +8pt</span>
+      </div>
+      <div class="kpi-value">33<span style="font-size:16px;font-weight:500">%</span></div>
+      <div class="kpi-label">紹介経由比率</div>
+    </div>
+
+  </div>
+
+  <!-- Chart + Activity -->
+  <div class="content-grid">
+
+    <!-- Bar Chart Card -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">マッチング数 推移</div>
+          <div style="font-size:12px;color:var(--text-sub);margin-top:3px">マッチング成立 / 成約</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" style="padding:5px 12px;font-size:12px">月次</button>
+          <button class="btn btn-primary" style="padding:5px 12px;font-size:12px">週次</button>
+        </div>
+      </div>
+      <div class="chart-area">
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--main)"></div>マッチング
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--accent)"></div>成約
+          </div>
+        </div>
+
+        <div class="bar-chart">
+          <!-- Mon -->
+          <div class="bar-group">
+            <div class="bars">
+              <div class="bar main" style="height:56px"></div>
+              <div class="bar accent" style="height:34px"></div>
+            </div>
+            <div class="bar-label">月</div>
+          </div>
+          <!-- Tue -->
+          <div class="bar-group">
+            <div class="bars">
+              <div class="bar main" style="height:70px"></div>
+              <div class="bar accent" style="height:44px"></div>
+            </div>
+            <div class="bar-label">火</div>
+          </div>
+          <!-- Wed -->
+          <div class="bar-group">
+            <div class="bars">
+              <div class="bar main" style="height:48px"></div>
+              <div class="bar accent" style="height:28px"></div>
+            </div>
+            <div class="bar-label">水</div>
+          </div>
+          <!-- Thu — today (highlighted) -->
+          <div class="bar-group">
+            <div class="bars">
+              <div class="bar main" style="height:100px;filter:brightness(1.1)"></div>
+              <div class="bar accent" style="height:62px;filter:brightness(1.1)"></div>
+            </div>
+            <div class="bar-label" style="color:var(--main);font-weight:600">木</div>
+          </div>
+          <!-- Fri -->
+          <div class="bar-group">
+            <div class="bars">
+              <div class="bar main" style="height:80px"></div>
+              <div class="bar accent" style="height:50px"></div>
+            </div>
+            <div class="bar-label">金</div>
+          </div>
+          <!-- Sat -->
+          <div class="bar-group">
+            <div class="bars">
+              <div class="bar main" style="height:64px"></div>
+              <div class="bar accent" style="height:40px"></div>
+            </div>
+            <div class="bar-label">土</div>
+          </div>
+          <!-- Sun -->
+          <div class="bar-group">
+            <div class="bars">
+              <div class="bar main" style="height:40px"></div>
+              <div class="bar accent" style="height:24px"></div>
+            </div>
+            <div class="bar-label">日</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ring Card -->
+    <div class="card ring-card">
+      <div class="card-header">
+        <div class="card-title">稼働状況</div>
+        <span class="card-link">詳細 →</span>
+      </div>
+
+      <div class="ring-wrap">
+        <div style="position:relative;width:130px;height:130px">
+          <svg width="130" height="130" viewBox="0 0 130 130">
+            <circle cx="65" cy="65" r="52" fill="none" stroke="var(--border)" stroke-width="12"/>
+            <circle cx="65" cy="65" r="52" fill="none"
+              stroke="url(#grad1)" stroke-width="12"
+              stroke-dasharray="326.7" stroke-dashoffset="81.7"
+              stroke-linecap="round" transform="rotate(-90 65 65)"/>
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#1A5FA8"/>
+                <stop offset="100%" stop-color="#2CA58D"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-value">75%</div>
+            <div class="ring-unit">稼働率</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ring-stats">
+        <div class="ring-stat-item">
+          <div class="ring-stat-val blue">31</div>
+          <div class="ring-stat-lbl">稼働中</div>
+        </div>
+        <div class="ring-stat-item">
+          <div class="ring-stat-val" style="color:var(--yellow)">7</div>
+          <div class="ring-stat-lbl">対応中</div>
+        </div>
+        <div class="ring-stat-item">
+          <div class="ring-stat-val green">186</div>
+          <div class="ring-stat-lbl">今月成約</div>
+        </div>
+        <div class="ring-stat-item">
+          <div class="ring-stat-val" style="color:var(--text-sub)">4</div>
+          <div class="ring-stat-lbl">オフライン</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Agent Table + Match List -->
+  <div class="match-section">
+
+    <!-- Matching Queue -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">マッチング待ち</div>
+        <span class="card-link">すべて見る →</span>
+      </div>
+      <div class="match-list">
+
+        <div class="match-item">
+          <div class="match-avatar">🏠</div>
+          <div class="match-info">
+            <div class="match-name">田中 さゆり</div>
+            <div class="match-detail">横浜市港北区・3LDK・予算4,000万円</div>
+          </div>
+          <div class="match-score-badge high">96%</div>
+        </div>
+
+        <div class="match-item">
+          <div class="match-avatar">🔑</div>
+          <div class="match-info">
+            <div class="match-name">佐藤 隆之</div>
+            <div class="match-detail">川崎市宮前区・4LDK・学区重視</div>
+          </div>
+          <div class="match-score-badge high">91%</div>
+        </div>
+
+        <div class="match-item">
+          <div class="match-avatar">🏡</div>
+          <div class="match-info">
+            <div class="match-name">鈴木 みほ</div>
+            <div class="match-detail">藤沢市・2LDK・駅徒歩5分以内</div>
+          </div>
+          <div class="match-score-badge">84%</div>
+        </div>
+
+        <div class="match-item">
+          <div class="match-avatar">🗝</div>
+          <div class="match-info">
+            <div class="match-name">山本 大輔</div>
+            <div class="match-detail">相模原市南区・3LDK・ペット可</div>
+          </div>
+          <div class="match-score-badge">78%</div>
+        </div>
+
+        <div class="match-item">
+          <div class="match-avatar">🏘</div>
+          <div class="match-info">
+            <div class="match-name">伊藤 さおり</div>
+            <div class="match-detail">横浜市青葉区・4LDK・南向き希望</div>
+          </div>
+          <div class="match-score-badge">73%</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">最新アクティビティ</div>
+        <span class="card-link">すべて見る →</span>
+      </div>
+      <div class="notif-list">
+
+        <div class="notif-item">
+          <div class="notif-dot blue"></div>
+          <div>
+            <div class="notif-text"><span class="notif-bold">成約完了：</span>田中さゆり様 × 木村エージェント（横浜市港北区 4,200万円）</div>
+            <div class="notif-time">2分前</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-dot green"></div>
+          <div>
+            <div class="notif-text"><span class="notif-bold">新規マッチング：</span>佐藤隆之様のAIスコアが91%に更新されました</div>
+            <div class="notif-time">15分前</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-dot yellow"></div>
+          <div>
+            <div class="notif-text"><span class="notif-bold">口コミ投稿：</span>★5 「はじめて会うのに、なぜか安心できました。」</div>
+            <div class="notif-time">32分前</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-dot blue"></div>
+          <div>
+            <div class="notif-text"><span class="notif-bold">新規登録：</span>小林エージェントが川崎エリアに参加しました</div>
+            <div class="notif-time">1時間前</div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-dot green"></div>
+          <div>
+            <div class="notif-text"><span class="notif-bold">LINE紹介：</span>鈴木みほ様が友人2名に AgentMatch をシェア</div>
+            <div class="notif-time">2時間前</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Agent Table -->
+  <div class="card agent-card">
+    <div class="card-header">
+      <div class="card-title">エージェント一覧（上位）</div>
+      <span class="card-link">すべて見る →</span>
+    </div>
+    <table class="agent-table">
+      <thead>
+        <tr>
+          <th>エージェント</th>
+          <th>対応エリア</th>
+          <th>評価</th>
+          <th>成約数</th>
+          <th>マッチ率</th>
+          <th>ステータス</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="agent-profile">
+              <div class="agent-avatar" style="background:linear-gradient(135deg,#1A5FA8,#2CA58D)">木村</div>
+              <div>
+                <div class="agent-name">木村 康介</div>
+                <div class="agent-area">横浜・川崎 専門</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:var(--text-sub);font-size:13px">横浜市・川崎市</td>
+          <td>
+            <div class="stars">★★★★★</div>
+            <div class="score" style="color:var(--yellow)">4.9</div>
+          </td>
+          <td style="font-weight:600">124件</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar"><div class="progress-fill" style="width:92%"></div></div>
+              <span style="font-size:12px;font-weight:600;color:var(--main)">92%</span>
+            </div>
+          </td>
+          <td><span class="status-badge active">稼働中</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="agent-profile">
+              <div class="agent-avatar" style="background:linear-gradient(135deg,#2CA58D,#1A9E7A)">中村</div>
+              <div>
+                <div class="agent-name">中村 美奈</div>
+                <div class="agent-area">藤沢・茅ヶ崎 専門</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:var(--text-sub);font-size:13px">藤沢市・茅ヶ崎市</td>
+          <td>
+            <div class="stars">★★★★★</div>
+            <div class="score" style="color:var(--yellow)">4.8</div>
+          </td>
+          <td style="font-weight:600">98件</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
+              <span style="font-size:12px;font-weight:600;color:var(--main)">87%</span>
+            </div>
+          </td>
+          <td><span class="status-badge active">稼働中</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="agent-profile">
+              <div class="agent-avatar" style="background:linear-gradient(135deg,#F0A500,#E07B00)">小林</div>
+              <div>
+                <div class="agent-name">小林 健太</div>
+                <div class="agent-area">相模原 専門</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:var(--text-sub);font-size:13px">相模原市全域</td>
+          <td>
+            <div class="stars">★★★★☆</div>
+            <div class="score" style="color:var(--yellow)">4.5</div>
+          </td>
+          <td style="font-weight:600">76件</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar"><div class="progress-fill" style="width:79%"></div></div>
+              <span style="font-size:12px;font-weight:600;color:var(--main)">79%</span>
+            </div>
+          </td>
+          <td><span class="status-badge busy">対応中</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="agent-profile">
+              <div class="agent-avatar" style="background:linear-gradient(135deg,#E05252,#C03030)">渡辺</div>
+              <div>
+                <div class="agent-name">渡辺 直子</div>
+                <div class="agent-area">横浜市内 全域</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:var(--text-sub);font-size:13px">横浜市全18区</td>
+          <td>
+            <div class="stars">★★★★☆</div>
+            <div class="score" style="color:var(--yellow)">4.4</div>
+          </td>
+          <td style="font-weight:600">62件</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar"><div class="progress-fill" style="width:71%"></div></div>
+              <span style="font-size:12px;font-weight:600;color:var(--main)">71%</span>
+            </div>
+          </td>
+          <td><span class="status-badge offline">オフライン</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+</body>
+</html>
